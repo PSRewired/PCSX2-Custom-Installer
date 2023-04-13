@@ -1,0 +1,21 @@
+name: "package-release"
+on:
+  release:
+    types: [published]
+
+jobs:
+  units:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Build final archive
+      run: |
+        make zip
+    - name: upload archive to release
+      uses: softprops/action-gh-release@v1
+      if: ${{startsWith(github.ref, 'refs/tags/') }}
+      with:
+          files: build/archive/PCSX2-Installer.zip
+          fail_on_unmatched_files: true
+

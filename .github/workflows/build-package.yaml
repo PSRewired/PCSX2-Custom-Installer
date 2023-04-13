@@ -1,0 +1,22 @@
+name: "build-lambda-package"
+on:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+jobs:
+  units:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Build installer
+      run: |
+        make
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: pxsx2-installer-archive
+        path: build/*
+
