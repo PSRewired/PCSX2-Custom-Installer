@@ -16,6 +16,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       if: ${{startsWith(github.ref, 'refs/tags/') }}
       with:
-          files: build/archive/PCSX2-Installer.zip
+          files: build/PCSX2-Installer.zip
           fail_on_unmatched_files: true
 
