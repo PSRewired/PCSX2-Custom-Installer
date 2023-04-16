@@ -17,12 +17,9 @@ Write-Host @"
 $Shell = New-Object -ComObject "WScript.Shell"
 $7zipPath = "$env:ProgramFiles\7-Zip\7z.exe"
 $workingDirectory = Get-Location
-Join-Path -Path $workingDirectory -ChildPath 'inis\PCSX2.ini'
-Join-Path -Path $workingDirectory -ChildPath 'hdd\'
-$newPath = (Join-Path -Path $workingDirectory -ChildPath 'hdd\AllSocomMaps.raw')
-(Get-Content -path (Join-Path -Path $workingDirectory -ChildPath 'inis\PCSX2.ini') -Raw) -replace '\.\\hdd\\AllSocomMaps\.raw', "$newPath"
-Exit 1
 
+
+# Ensure 7-Zip is installed (Thanks PCSX2...)
 if (-not (Test-Path -Path $7zipPath -PathType Leaf)) {
     Write-Host -ForegroundColor Red -BackgroundColor Black "You are missing 7-Zip which is required. Please download and install it before running this script."
 	$helpText = @"
@@ -38,6 +35,7 @@ Press No to exit
 
 Set-Alias Start-SevenZip $7zipPath
 
+# Determine and download latest release of PCSX2
 $repo = "pcsx2/PCSX2"
 $file = "PCSX2.7z"
 
@@ -58,6 +56,7 @@ Write-Host Extracting PCSX2 base install...
 Start-SevenZip x "$file" -y > $null
 Remove-Item "$file" -Force
 
+# Add custom folders for game data
 Write-Host Creating necessary folders...
 mkdir -Force hdd,games > $null
 
@@ -69,13 +68,16 @@ Remove-Item hdd.zip -Force
 
 Write-Host Configuring PCSX2...
 Expand-Archive include.zip -DestinationPath . -Force
+
+# PCSX2 DEV9 does not support local file paths for the HDD unfortunately, so we need
+# to replace the local path in the config with whatever the current directory setup is
 $newPath = (Join-Path -Path $workingDirectory -ChildPath 'hdd\AllSocomMaps.raw')
 $pcsxConfigPath = (Join-Path -Path $workingDirectory -ChildPath 'inis\PCSX2.ini')
 (Get-Content -path $pcsxConfigPath -Raw) -replace '\.\\hdd\\AllSocomMaps\.raw', "$newPath" | Set-Content -Path $pcsxConfigPath
 
-Remove-Item include.zip -Force
-
+# Cleanup and remove installer files
 Write-Host Cleaning up...
+Remove-Item include.zip -Force
 Remove-Item .\bin -Force -Recurse
 Remove-Item install.bat -Force
 
